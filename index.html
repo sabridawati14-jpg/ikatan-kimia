@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Ikatan Kimia di Bumi Sepakat Swato Sebo - Jambi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .jambi-pattern {
+            background-color: #0f172a;
+            background-image: radial-gradient(#d97706 0.75px, transparent 0.75px), radial-gradient(#d97706 0.75px, #0f172a 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            opacity: 0.95;
+        }
+        .atom-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .atom-node:hover {
+            transform: scale(1.15);
+        }
+        .glow-gold {
+            box-shadow: 0 0 15px rgba(217, 119, 6, 0.5);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="jambi-pattern flex flex-col min-h-screen text-slate-100">
+
+    <header class="bg-slate-900/90 border-b border-amber-600/40 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center font-bold text-slate-900 text-xl border-2 border-amber-300">
+                    <i class="fa-solid fa-atom"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-amber-400 leading-tight">ChemiJambi: Ikatan Kimia</h1>
+                    <p class="text-xs text-amber-200/70">Petualangan Sains Berbasis Kearifan Lokal Jambi (Kelas XI)</p>
+                </div>
+            </div>
+
+            <!-- Dashboard status & Skor -->
+            <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-1.5 rounded-full border border-amber-500/30">
+                <div class="flex items-center gap-1.5 text-amber-400 font-semibold text-sm">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span id="scoreText">Skor: 0</span>
+                </div>
+                <div class="h-4 w-px bg-slate-600"></div>
+                <div class="flex items-center gap-1.5 text-emerald-400 font-semibold text-sm">
+                    <i class="fa-solid fa-gem"></i>
+                    <span id="badgeCount">Lencana: 0/4</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Navigation Sidebar -->
+        <aside class="lg:col-span-1 bg-slate-900/80 backdrop-blur border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-3">
+            <h2 class="text-xs font-bold text-amber-400 uppercase tracking-wider px-2">Menu Petualangan</h2>
+            
+            <button onclick="switchTab('materi')" id="btn-materi" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-600 text-slate-950 font-bold shadow-lg transition-all text-left">
+                <i class="fa-solid fa-book-open text-lg"></i>
+                <div>
+                    <div class="text-sm">1. Rumah Rumah Kaji</div>
+                    <div class="text-[10px] font-normal opacity-80">Materi & Konsep Ikatan</div>
+                </div>
+            </button>
+
+            <button onclick="switchTab('lab')" id="btn-lab" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-all text-left border border-slate-700">
+                <i class="fa-solid fa-flask-vial text-lg text-cyan-400"></i>
+                <div>
+                    <div class="text-sm">2. Lab Bikin Senyawa</div>
+                    <div class="text-[10px] text-slate-400 font-normal">Simulasi Canvas Interaktif</div>
+                </div>
+            </button>
+
+            <button onclick="switchTab('kuis')" id="btn-kuis" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-all text-left border border-slate-700">
+                <i class="fa-solid fa-vihara text-lg text-amber-400"></i>
+                <div>
+                    <div class="text-sm">3. Ekspedisi Muaro Jambi</div>
+                    <div class="text-[10px] text-slate-400 font-normal">Kuis Tantangan Bertingkat</div>
+                </div>
+            </button>
+
+            <button onclick="switchTab('tabel')" id="btn-tabel" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-all text-left border border-slate-700">
+                <i class="fa-solid fa-table-cells text-lg text-emerald-400"></i>
+                <div>
+                    <div class="text-sm">4. Panduan Atom & Unsur</div>
+                    <div class="text-[10px] text-slate-400 font-normal">Sifat & Elektron Valensi</div>
+                </div>
+            </button>
+
+            <!-- Kearifan Lokal Jambi Info Box -->
+            <div class="mt-auto bg-amber-950/30 border border-amber-600/30 rounded-xl p-3 text-xs text-amber-200/80">
+                <p class="font-semibold text-amber-300 mb-1"><i class="fa-solid fa-map-pin mr-1"></i>Tahukah Kamu?</p>
+                Aroma khas nanas Tangkit Muaro Jambi & kekenyalan karet alami Bungo disebabkan oleh struktur ikatan kovalen unik pada senyawa penyusunnya!
+            </div>
+        </aside>
+
+        <!-- Dynamic Main Content Section -->
+        <section class="lg:col-span-3 bg-slate-900/80 backdrop-blur border border-amber-500/20 rounded-2xl p-4 md:p-6 flex flex-col">
+            
+            <div id="tab-materi" class="tab-content flex flex-col gap-6">
+                <div class="border-b border-slate-700 pb-4">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Modul 1: Konsep Dasar</span>
+                    <h2 class="text-2xl font-bold text-amber-400 mt-2">Belajar Ikatan Kimia Bersama Pengrajin Jambi</h2>
+                    <p class="text-slate-300 text-sm mt-1">Sama seperti kain Songket Jambi yang ditenun rapat dari benang emas dan benang katun, atom-atom di alam juga saling berikatan agar mencapai kestabilan (Kaidah Oktet/Duplet)!</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Card 1: Ikatan Ion -->
+                    <div class="bg-slate-800/90 border border-cyan-500/30 rounded-xl p-4 flex flex-col justify-between hover:border-cyan-400 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold mb-3 text-xl">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <h3 class="font-bold text-cyan-300 text-lg">1. Ikatan Ion</h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Serah terima elektron antara atom logam (melepas e⁻ jadi kation) dan nonlogam (menerima e⁻ jadi anion).
+                            </p>
+                            <div class="mt-3 p-2 bg-slate-900/80 rounded border border-cyan-500/20 text-[11px] text-cyan-200">
+                                <strong>Contoh Jambi:</strong> Garam dapur ($NaCl$) untuk pengawetan Ikan Asin khas Sungai Batanghari.
+                            </div>
+                        </div>
+                        <button onclick="showDetailModal('ion')" class="mt-4 text-xs bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 py-1.5 px-3 rounded text-center transition">Pelajari Mekanisme</button>
+                    </div>
+
+                    <!-- Card 2: Ikatan Kovalen -->
+                    <div class="bg-slate-800/90 border border-amber-500/30 rounded-xl p-4 flex flex-col justify-between hover:border-amber-400 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold mb-3 text-xl">
+                                <i class="fa-solid fa-handshake"></i>
+                            </div>
+                            <h3 class="font-bold text-amber-300 text-lg">2. Ikatan Kovalen</h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Pemakaian bersama pasangan elektron oleh sesama atom nonlogam. Bisa kovalen tunggal, rangkap 2, rangkap 3, atau koordinasi.
+                            </p>
+                            <div class="mt-3 p-2 bg-slate-900/80 rounded border border-amber-500/20 text-[11px] text-amber-200">
+                                <strong>Contoh Jambi:</strong> Air ($H_2O$) & Gas Karbon Dioksida ($CO_2$) fotosintesis tanaman kelapa sawit & nanas Tangkit.
+                            </div>
+                        </div>
+                        <button onclick="showDetailModal('kovalen')" class="mt-4 text-xs bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 py-1.5 px-3 rounded text-center transition">Pelajari Mekanisme</button>
+                    </div>
+
+                    <!-- Card 3: Ikatan Logam -->
+                    <div class="bg-slate-800/90 border border-emerald-500/30 rounded-xl p-4 flex flex-col justify-between hover:border-emerald-400 transition-all">
+                        <div>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold mb-3 text-xl">
+                                <i class="fa-solid fa-cubes"></i>
+                            </div>
+                            <h3 class="font-bold text-emerald-300 text-lg">3. Ikatan Logam</h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Daya tarik antara kation logam dengan "lautan elektron" yang bebas bergerak. Mengapa logam mudah ditempa & menghantar listrik.
+                            </p>
+                            <div class="mt-3 p-2 bg-slate-900/80 rounded border border-emerald-500/20 text-[11px] text-emerald-200">
+                                <strong>Contoh Jambi:</strong> Kerajinan Tembaga & Emas khas perhiasan pengantin Melayu Jambi.
+                            </div>
+                        </div>
+                        <button onclick="showDetailModal('logam')" class="mt-4 text-xs bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 py-1.5 px-3 rounded text-center transition">Pelajari Mekanisme</button>
+                    </div>
+                </div>
+
+                <!-- Interactive Lewis Quiz Warmup -->
+                <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700">
+                    <h3 class="font-bold text-amber-300 text-sm flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-lightbulb"></i> Tahukah Kamu Aturan Oktet?
+                    </h3>
+                    <p class="text-xs text-slate-300 mb-3">
+                        Atom cenderung ingin memiliki **8 elektron valensi** (seperti gas mulia) untuk stabil, kecuali Hidrogen ($H$) yang cukup **2 elektron (Duplet)**.
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <div class="bg-slate-900 px-3 py-1.5 rounded border border-slate-700 text-slate-300">Na (Gol I A) ➔ Lepas 1 e⁻ ➔ Na⁺</div>
+                        <div class="bg-slate-900 px-3 py-1.5 rounded border border-slate-700 text-slate-300">Cl (Gol VII A) ➔ Tangkap 1 e⁻ ➔ Cl⁻</div>
+                        <div class="bg-slate-900 px-3 py-1.5 rounded border border-slate-700 text-slate-300">O (Gol VI A) ➔ Butuh 2 e⁻ lagi</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-lab" class="tab-content hidden flex-col gap-4">
+                <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700 pb-3">
+                    <div>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Modul 2: Laboratorium Canvas</span>
+                        <h2 class="text-xl font-bold text-amber-400 mt-1">Simulasi Pembentukan Senyawa Kimia</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="presetSelect" onchange="loadPreset()" class="bg-slate-800 border border-amber-500/40 text-amber-300 text-xs rounded-lg px-3 py-2 font-medium focus:outline-none">
+                            <option value="NaCl">Pilih Senyawa Jambi: Garam NaCl (Ion)</option>
+                            <option value="H2O">Minyak & Air Sungai H2O (Kovalen)</option>
+                            <option value="CO2">Asap Pembakaran CO2 (Kovalen Rangkap 2)</option>
+                            <option value="NH3">Pupuk Sawit NH3 (Kovalen Pasangan Bebas)</option>
+                        </select>
+                        <button onclick="resetLabCanvas()" class="bg-rose-600/80 hover:bg-rose-600 text-white text-xs px-3 py-2 rounded-lg font-bold transition">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Canvas Visual Container -->
+                <div class="relative bg-slate-950 border-2 border-amber-500/30 rounded-xl overflow-hidden shadow-2xl flex flex-col items-center">
+                    <canvas id="chemCanvas" width="700" height="380" class="w-full h-[380px] cursor-pointer"></canvas>
+                    
+                    <!-- Floating Overlay Controls -->
+                    <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 border border-slate-700 p-2.5 rounded-lg flex flex-wrap justify-between items-center text-xs gap-2 backdrop-blur">
+                        <div class="flex items-center gap-3">
+                            <span class="text-amber-400 font-bold"><i class="fa-solid fa-info-circle mr-1"></i> Petunjuk:</span>
+                            <span id="labInstructionText" class="text-slate-300">Geser atom mendekat satu sama lain untuk membentuk ikatan!</span>
+                        </div>
+                        <button onclick="checkReaction()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-1.5 rounded transition shadow-md">
+                            <i class="fa-solid fa-atom mr-1"></i> Uji Ikatan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Deskripsi Hasil Lab -->
+                <div id="labResultCard" class="bg-slate-800/80 border border-slate-700 p-4 rounded-xl text-xs flex flex-col gap-2">
+                    <h4 id="labResultTitle" class="font-bold text-amber-300 text-sm">Status Laboratorium: Siap Melakukan Eksperimen</h4>
+                    <p id="labResultDesc" class="text-slate-300 leading-relaxed">
+                        Pilih senyawa khas yang ada di Provinsi Jambi pada menu di atas, lalu hubungkan atom-atom dengan menariknya hingga tumpang tindih elektron valensinya!
+                    </p>
+                </div>
+            </div>
+
+            <div id="tab-kuis" class="tab-content hidden flex-col gap-6">
+                <div class="border-b border-slate-700 pb-3">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Modul 3: Tantangan Kuis</span>
+                    <h2 class="text-2xl font-bold text-amber-400 mt-1">Ekspedisi Kimia Candi Muaro Jambi</h2>
+                    <p class="text-xs text-slate-300 mt-1">Jawab pertanyaan-pertanyaan kimia berlatar kearifan lokal Jambi untuk membuka gerbang Candi Kotomahligai dan Candi Tinggi!</p>
+                </div>
+
+                <!-- Quiz Box -->
+                <div id="quizContainer" class="bg-slate-800/90 border border-amber-500/30 rounded-2xl p-5 flex flex-col gap-5 shadow-xl relative overflow-hidden">
+                    <div class="flex justify-between items-center text-xs font-semibold text-slate-400 border-b border-slate-700 pb-2">
+                        <span id="quizProgressText">Soal 1 dari 5</span>
+                        <span id="quizCategoryText" class="text-amber-400">Kategori: Ikatan Ion & Kovalen</span>
+                    </div>
+
+                    <h3 id="quizQuestionText" class="text-base md:text-lg font-semibold text-slate-100 leading-snug">
+                        Memuat Pertanyaan...
+                    </h3>
+
+                    <!-- Choices -->
+                    <div id="quizOptionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Dynamic options generated by JS -->
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="quizFeedback" class="hidden p-3 rounded-lg text-xs font-medium border"></div>
+
+                    <!-- Next Button -->
+                    <div class="flex justify-end mt-2">
+                        <button id="nextQuizBtn" onclick="nextQuestion()" class="hidden bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs transition">
+                            Pertanyaan Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-tabel" class="tab-content hidden flex-col gap-4">
+                <div class="border-b border-slate-700 pb-3">
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Modul 4: Panduan Kimia</span>
+                    <h2 class="text-2xl font-bold text-emerald-400 mt-1">Kartu Unsur Elektron Valensi</h2>
+                    <p class="text-xs text-slate-300 mt-1">Gunakan referensi elektron valensi unsur berikut untuk menyelesaikan perhitungan ikatan kimia!</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <!-- Hidrogen -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 1</span>
+                        <span class="text-2xl font-bold text-amber-400 my-1">H</span>
+                        <span class="text-xs font-medium text-slate-200">Hidrogen</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 1</span>
+                    </div>
+
+                    <!-- Karbon -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 6</span>
+                        <span class="text-2xl font-bold text-cyan-400 my-1">C</span>
+                        <span class="text-xs font-medium text-slate-200">Karbon</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 4</span>
+                    </div>
+
+                    <!-- Nitrogen -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 7</span>
+                        <span class="text-2xl font-bold text-indigo-400 my-1">N</span>
+                        <span class="text-xs font-medium text-slate-200">Nitrogen</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 5</span>
+                    </div>
+
+                    <!-- Oksigen -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 8</span>
+                        <span class="text-2xl font-bold text-rose-400 my-1">O</span>
+                        <span class="text-xs font-medium text-slate-200">Oksigen</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 6</span>
+                    </div>
+
+                    <!-- Natrium -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 11</span>
+                        <span class="text-2xl font-bold text-yellow-400 my-1">Na</span>
+                        <span class="text-xs font-medium text-slate-200">Natrium</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 1</span>
+                    </div>
+
+                    <!-- Klorin -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 17</span>
+                        <span class="text-2xl font-bold text-green-400 my-1">Cl</span>
+                        <span class="text-xs font-medium text-slate-200">Klorin</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 7</span>
+                    </div>
+
+                    <!-- Tembaga -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 29</span>
+                        <span class="text-2xl font-bold text-amber-500 my-1">Cu</span>
+                        <span class="text-xs font-medium text-slate-200">Tembaga</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">Logam Transisi</span>
+                    </div>
+
+                    <!-- Belerang / Sulfur -->
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex flex-col items-center text-center hover:border-amber-400 transition">
+                        <span class="text-[10px] text-slate-400">Nomor Atom: 16</span>
+                        <span class="text-2xl font-bold text-lime-400 my-1">S</span>
+                        <span class="text-xs font-medium text-slate-200">Belerang</span>
+                        <span class="text-[10px] text-emerald-400 mt-1 bg-emerald-950 px-2 py-0.5 rounded">e⁻ Valensi: 6</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal Detail Ikatan -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-6 relative flex flex-col gap-4">
+            <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 id="modalTitle" class="text-xl font-bold text-amber-400">Judul Ikatan</h3>
+            <div id="modalBody" class="text-xs text-slate-300 leading-relaxed flex flex-col gap-3">
+                <!-- Dynamic Content -->
+            </div>
+            <button onclick="closeDetailModal()" class="mt-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs">Paham, Kembali ke Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State Variables
+        let userScore = 0;
+        let badges = [false, false, false, false]; // 4 Badges max
+
+        // Tab Switching Function
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-600', 'text-slate-950', 'font-bold');
+                btn.classList.add('bg-slate-800', 'text-slate-200', 'font-medium');
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('bg-slate-800', 'text-slate-200', 'font-medium');
+            activeBtn.classList.add('bg-amber-600', 'text-slate-950', 'font-bold');
+
+            if(tabId === 'lab') {
+                initCanvas();
+            }
+        }
+
+        // Add Points
+        function addScore(pts) {
+            userScore += pts;
+            document.getElementById('scoreText').innerText = `Skor: ${userScore}`;
+        }
+
+        function unlockBadge(index) {
+            if(!badges[index]) {
+                badges[index] = true;
+                const count = badges.filter(Boolean).length;
+                document.getElementById('badgeCount').innerText = `Lencana: ${count}/4`;
+            }
+        }
+
+        // Detail Modal Logic
+        function showDetailModal(type) {
+            const modal = document.getElementById('detailModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            if(type === 'ion') {
+                title.innerText = '⚡ Mekanisme Ikatan Ion (Serah Terima Electron)';
+                body.innerHTML = `
+                    <p>Terjadi antara unsur <strong>Logam</strong> (Golongan IA, IIA) dan <strong>Non-logam</strong> (Golongan VIA, VIIA).</p>
+                    <p>Contoh: <strong>NaCl</strong> (Garam Dapur pengawetan ikan asin Sungai Batanghari Jambi).</p>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-200">
+                        <li>Atom Natrium (Na) melepaskan 1 elektron valensi: <i>Na ➔ Na⁺ + e⁻</i></li>
+                        <li>Atom Klorin (Cl) menangkap 1 elektron tersebut: <i>Cl + e⁻ ➔ Cl⁻</i></li>
+                        <li>Gaya elektrostatis mengikat ikatan kation Na⁺ dan anion Cl⁻.</li>
+                    </ul>
+                `;
+            } else if(type === 'kovalen') {
+                title.innerText = '🤝 Mekanisme Ikatan Kovalen (Pemakaian Bersama)';
+                body.innerHTML = `
+                    <p>Terjadi antara sesama unsur <strong>Non-logam</strong> karena memiliki keelektronegatifan yang relatif tinggi.</p>
+                    <p>Contoh: Air <strong>H₂O</strong> & Karbon Dioksida <strong>CO₂</strong> pada perkebunan Karet & Nanas Tangkit Jambi.</p>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-200">
+                        <li><strong>Kovalen Tunggal:</strong> Berbagi 1 pasang elektron (contoh: H-O-H).</li>
+                        <li><strong>Kovalen Rangkap 2:</strong> Berbagi 2 pasang elektron (contoh: O=C=O).</li>
+                        <li><strong>Kovalen Koordinasi:</strong> Pasangan elektron yang dipakai bersama berasal dari satu atom saja (contoh: NH₄⁺).</li>
+                    </ul>
+                `;
+            } else if(type === 'logam') {
+                title.innerText = '🧱 Mekanisme Ikatan Logam (Lautan Elektron)';
+                body.innerHTML = `
+                    <p>Terjadi antara atom-atom unsur <strong>Logam</strong>.</p>
+                    <p>Contoh: Kerajinan Tembaga & Emas perhiasan adat Melayu Jambi.</p>
+                    <p>Elektron valensi dapat bergerak bebas mengelilingi inti-inti atom positif. Ini menyebabkan logam:</p>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-200">
+                        <li>Mudah ditempa/dibentuk tanpa patah.</li>
+                        <li>Menghantarkan panas dan listrik secara baik.</li>
+                        <li>Memiliki kilapan metallic yang indah.</li>
+                    </ul>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        let canvas, ctx;
+        let atoms = [];
+        let selectedAtom = null;
+        let currentPreset = 'NaCl';
+
+        function initCanvas() {
+            canvas = document.getElementById('chemCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Responsive sizing handle
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = 380;
+
+            loadPreset();
+
+            // Mouse / Touch Drag events
+            canvas.onmousedown = handleMouseDown;
+            canvas.onmousemove = handleMouseMove;
+            canvas.onmouseup = handleMouseUp;
+
+            canvas.ontouchstart = (e) => handleMouseDown(e.touches[0]);
+            canvas.ontouchmove = (e) => handleMouseMove(e.touches[0]);
+            canvas.ontouchend = handleMouseUp;
+
+            requestAnimationFrame(renderCanvas);
+        }
+
+        function loadPreset() {
+            currentPreset = document.getElementById('presetSelect').value;
+            atoms = [];
+
+            const width = canvas ? canvas.width : 700;
+            const height = canvas ? canvas.height : 380;
+
+            if(currentPreset === 'NaCl') {
+                atoms.push({ id: 1, symbol: 'Na', x: width * 0.3, y: height * 0.5, radius: 35, color: '#eab308', valence: 1, type: 'metal' });
+                atoms.push({ id: 2, symbol: 'Cl', x: width * 0.7, y: height * 0.5, radius: 42, color: '#22c55e', valence: 7, type: 'nonmetal' });
+                document.getElementById('labInstructionText').innerText = 'Geser Na dan Cl mendekat untuk mensimulasikan transfer elektron!';
+            } else if(currentPreset === 'H2O') {
+                atoms.push({ id: 1, symbol: 'O', x: width * 0.5, y: height * 0.4, radius: 40, color: '#f43f5e', valence: 6, type: 'nonmetal' });
+                atoms.push({ id: 2, symbol: 'H', x: width * 0.25, y: height * 0.65, radius: 25, color: '#fbbf24', valence: 1, type: 'nonmetal' });
+                atoms.push({ id: 3, symbol: 'H', x: width * 0.75, y: height * 0.65, radius: 25, color: '#fbbf24', valence: 1, type: 'nonmetal' });
+                document.getElementById('labInstructionText').innerText = 'Geser kedua atom Hidrogen mendekati Oksigen untuk membagi elektron!';
+            } else if(currentPreset === 'CO2') {
+                atoms.push({ id: 1, symbol: 'C', x: width * 0.5, y: height * 0.5, radius: 38, color: '#06b6d4', valence: 4, type: 'nonmetal' });
+                atoms.push({ id: 2, symbol: 'O', x: width * 0.2, y: height * 0.5, radius: 40, color: '#f43f5e', valence: 6, type: 'nonmetal' });
+                atoms.push({ id: 3, symbol: 'O', x: width * 0.8, y: height * 0.5, radius: 40, color: '#f43f5e', valence: 6, type: 'nonmetal' });
+                document.getElementById('labInstructionText').innerText = 'Bentuk ikatan kovalen rangkap 2 antara Karbon dan dua atom Oksigen!';
+            } else if(currentPreset === 'NH3') {
+                atoms.push({ id: 1, symbol: 'N', x: width * 0.5, y: height * 0.4, radius: 38, color: '#6366f1', valence: 5, type: 'nonmetal' });
+                atoms.push({ id: 2, symbol: 'H', x: width * 0.25, y: height * 0.7, radius: 25, color: '#fbbf24', valence: 1, type: 'nonmetal' });
+                atoms.push({ id: 3, symbol: 'H', x: width * 0.5, y: height * 0.75, radius: 25, color: '#fbbf24', valence: 1, type: 'nonmetal' });
+                atoms.push({ id: 4, symbol: 'H', x: width * 0.75, y: height * 0.7, radius: 25, color: '#fbbf24', valence: 1, type: 'nonmetal' });
+                document.getElementById('labInstructionText').innerText = 'Geser 3 atom Hidrogen ke Nitrogen (senyawa Amonia pupuk kelapa sawit Jambi)!';
+            }
+
+            document.getElementById('labResultTitle').innerText = `Eksperimen ${currentPreset}`;
+            document.getElementById('labResultDesc').innerText = `Susun atom-atom ${currentPreset} di canvas canvas!`;
+        }
+
+        function resetLabCanvas() {
+            loadPreset();
+        }
+
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            atoms.forEach(atom => {
+                const dist = Math.hypot(atom.x - mouseX, atom.y - mouseY);
+                if(dist < atom.radius) {
+                    selectedAtom = atom;
+                }
+            });
+        }
+
+        function handleMouseMove(e) {
+            if(selectedAtom) {
+                const rect = canvas.getBoundingClientRect();
+                selectedAtom.x = e.clientX - rect.left;
+                selectedAtom.y = e.clientY - rect.top;
+            }
+        }
+
+        function handleMouseUp() {
+            selectedAtom = null;
+        }
+
+        function renderCanvas() {
+            if(!ctx) return;
+
+            // Clear Background
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid guidelines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for(let x=0; x<canvas.width; x+=40) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y=0; y<canvas.height; y+=40) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            // Draw connecting bond lines if close
+            for(let i=0; i<atoms.length; i++) {
+                for(let j=i+1; j<atoms.length; j++) {
+                    const dist = Math.hypot(atoms[i].x - atoms[j].x, atoms[i].y - atoms[j].y);
+                    if(dist < 130) {
+                        ctx.beginPath();
+                        ctx.moveTo(atoms[i].x, atoms[i].y);
+                        ctx.lineTo(atoms[j].x, atoms[j].y);
+                        ctx.strokeStyle = dist < 85 ? '#f59e0b' : '#334155';
+                        ctx.lineWidth = dist < 85 ? 4 : 2;
+                        if(dist < 85) ctx.setLineDash([5, 5]); else ctx.setLineDash([]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+
+            // Render Atoms & Valence Dots
+            atoms.forEach(atom => {
+                // Outer glow
+                ctx.beginPath();
+                ctx.arc(atom.x, atom.y, atom.radius + 6, 0, Math.PI * 2);
+                ctx.fillStyle = atom.color + '22';
+                ctx.fill();
+
+                // Atom Body
+                ctx.beginPath();
+                ctx.arc(atom.x, atom.y, atom.radius, 0, Math.PI * 2);
+                ctx.fillStyle = atom.color;
+                ctx.fill();
+                ctx.strokeStyle = '#f8fafc';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Symbol
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 18px Poppins';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(atom.symbol, atom.x, atom.y);
+
+                // Render Valence Dots around atom
+                const dots = atom.valence;
+                for(let d=0; d<dots; d++) {
+                    const angle = (d * (2 * Math.PI / dots)) - (Math.PI / 2);
+                    const dotX = atom.x + (atom.radius + 12) * Math.cos(angle);
+                    const dotY = atom.y + (atom.radius + 12) * Math.sin(angle);
+
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fill();
+                    ctx.strokeStyle = '#020617';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            });
+
+            requestAnimationFrame(renderCanvas);
+        }
+
+        // Uji Formasi Ikatan pada Canvas
+        function checkReaction() {
+            let closeCount = 0;
+            const threshold = 100;
+
+            for(let i=0; i<atoms.length; i++) {
+                for(let j=i+1; j<atoms.length; j++) {
+                    const dist = Math.hypot(atoms[i].x - atoms[j].x, atoms[i].y - atoms[j].y);
+                    if(dist < threshold) closeCount++;
+                }
+            }
+
+            const title = document.getElementById('labResultTitle');
+            const desc = document.getElementById('labResultDesc');
+
+            if(currentPreset === 'NaCl' && closeCount >= 1) {
+                title.innerText = '✅ Berhasil! Terbentuk Ikatan Ion (NaCl)';
+                desc.innerHTML = '<span class="text-emerald-400 font-bold">Penjelasan:</span> Atom Na menyerahkan 1 e⁻ valensinya ke Cl. Na menjadi Na⁺ dan Cl menjadi Cl⁻. Keduanya mengikat kuat membentuk garam dapur penyedap kuliner Tempoyak & Ikan Asin khas Batanghari Jambi!';
+                addScore(25);
+                unlockBadge(0);
+            } else if(currentPreset === 'H2O' && closeCount >= 2) {
+                title.innerText = '✅ Berhasil! Terbentuk Ikatan Kovalen Tunggal (H₂O)';
+                desc.innerHTML = '<span class="text-emerald-400 font-bold">Penjelasan:</span> Dua atom Hidrogen berbagi pasangan elektron secara bersama dengan Oksigen. Membentuk senyawa air vital pendukung ekosistem Danau Kaco & Sungai Batanghari Jambi!';
+                addScore(25);
+                unlockBadge(1);
+            } else if(currentPreset === 'CO2' && closeCount >= 2) {
+                title.innerText = '✅ Berhasil! Terbentuk Kovalen Rangkap Dua (CO₂)';
+                desc.innerHTML = '<span class="text-emerald-400 font-bold">Penjelasan:</span> Atom Karbon berbagi 2 pasang elektron (rangkap dua) dengan masing-masing atom Oksigen (O=C=O). Senyawa ini diserap dalam fotosintesis kebun Nanas Tangkit Muaro Jambi!';
+                addScore(25);
+                unlockBadge(2);
+            } else if(currentPreset === 'NH3' && closeCount >= 3) {
+                title.innerText = '✅ Berhasil! Terbentuk Kovalen Amonia (NH₃)';
+                desc.innerHTML = '<span class="text-emerald-400 font-bold">Penjelasan:</span> Atom Nitrogen memakai bersama elektron dengan 3 atom Hidrogen dan menyisakan 1 Pasang Elektron Bebas (PEB). Amonia merupakan bahan utama pupuk kelapa sawit di Jambi!';
+                addScore(25);
+                unlockBadge(3);
+            } else {
+                title.innerText = '⚠️ Belum Stabil / Terlalu Jauh';
+                desc.innerText = 'Pindahkan atom-atom lebih dekat satu sama lain hingga orbital elektron terdekat overlap!';
+            }
+        }
+
+        const quizData = [
+            {
+                question: "Di daerah pesisir Sungai Batanghari Jambi, masyarakat mengawetkan ikan dengan garam dapur (NaCl). Jenis ikatan kimia yang terdapat pada NaCl adalah...",
+                options: ["Ikatan Kovalen Tunggal", "Ikatan Ion", "Ikatan Kovalen Koordinasi", "Ikatan Logam"],
+                correct: 1,
+                explanation: "NaCl terbentuk dari serah terima elektron antara logam Natrium (Na⁺) dan non-logam Klorin (Cl⁻) sehingga membentuk ikatan ION."
+            },
+            {
+                question: "Tanaman Nanas di Tangkit Baru Muaro Jambi membutuhkan fotosintesis yang melibatkan gas CO₂. Struktur ikatan pada molekul CO₂ adalah...",
+                options: ["2 ikatan kovalen tunggal", "2 ikatan kovalen rangkap dua", "1 ikatan ion dan 1 kovalen", "Ikatan kovalen koordinasi"],
+                correct: 1,
+                explanation: "Pada Karbon Dioksida (O=C=O), atom C membagikan 2 pasang elektron valensi ke masing-masing atom Oksigen membentuk 2 ikatan kovalen rangkap dua."
+            },
+            {
+                question: "Kerajinan perhiasan adat Melayu Jambi terbuat dari logam tembaga dan emas yang tidak mudah patah saat ditempa. Sifat ini disebabkan oleh...",
+                options: ["Adanya pasangan elektron bebas yang kaku", "Gaya tarik ionik antar kation positif", "Lautan elektron yang bebas bergerak di antara kation logam", "Gaya van der Waals yang rapuh"],
+                correct: 2,
+                explanation: "Dalam ikatan logam, elektron valensi membentuk 'lautan elektron' bermuatan negatif yang bebas mengelilingi ion positif logam sehingga lentur dan konduktif."
+            },
+            {
+                question: "Unsur Nitrogen (N) memiliki nomor atom 7. Berapa jumlah elektron valensi atom N untuk membentuk pupuk amonia (NH₃) perkebunan Jambi?",
+                options: ["3 elektron", "5 elektron", "7 elektron", "8 elektron"],
+                correct: 1,
+                explanation: "Konfigurasi elektron N (7) = 2, 5. Maka elektron valensinya adalah 5."
+            },
+            {
+                question: "Getah karet alami dari perkebunan Bungo Jambi mengandung monomer isoprena berikatan kovalen. Atom Hidrogen (H) cukup membutuhkan 2 elektron agar stabil yang dikenal sebagai kaidah...",
+                options: ["Kaidah Oktet", "Kaidah Duplet", "Kaidah Triplet", "Kaidah Hibridisasi"],
+                correct: 1,
+                explanation: "Kaidah Duplet adalah kecenderungan atom mencapai kestabilan dengan memiliki 2 elektron valensi (seperti atom Helium), khusus untuk H dan Li."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+
+        function loadQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quizProgressText').innerText = `Soal ${currentQuizIndex + 1} dari ${quizData.length}`;
+            document.getElementById('quizQuestionText').innerText = q.question;
+
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.add('hidden');
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-xl bg-slate-900 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs font-medium text-left transition flex items-center gap-3";
+                btn.onclick = () => checkAnswer(idx);
+                btn.innerHTML = `
+                    <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center font-bold text-amber-400 shrink-0">${String.fromCharCode(65 + idx)}</span>
+                    <span>${opt}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            const q = quizData[currentQuizIndex];
+            const feedback = document.getElementById('quizFeedback');
+            const options = document.getElementById('quizOptionsContainer').children;
+
+            // Disable buttons after answer
+            for(let btn of options) {
+                btn.disabled = true;
+            }
+
+            if(selectedIndex === q.correct) {
+                options[selectedIndex].classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                feedback.className = "p-3 rounded-lg text-xs font-medium border bg-emerald-950/60 border-emerald-500/50 text-emerald-300 block";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> <strong>Jawaban Benar!</strong> ${q.explanation}`;
+                addScore(20);
+            } else {
+                options[selectedIndex].classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-200');
+                options[q.correct].classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                feedback.className = "p-3 rounded-lg text-xs font-medium border bg-rose-950/60 border-rose-500/50 text-rose-300 block";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> <strong>Kurang Tepat!</strong> ${q.explanation}`;
+            }
+
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if(currentQuizIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                // Quiz Completed
+                const container = document.getElementById('quizContainer');
+                container.innerHTML = `
+                    <div class="text-center py-8 flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 bg-amber-500/20 text-amber-400 border-2 border-amber-400 rounded-full flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-amber-400">Selamat! Ekspedisi Selesai</h3>
+                        <p class="text-xs text-slate-300 max-w-md">
+                            Kamu telah berhasil menjawab pertanyaan sains ikatan kimia berbasis kearifan lokal Provinsi Jambi dengan total Skor: <strong class="text-amber-400 text-sm">${userScore}</strong>!
+                        </p>
+                        <button onclick="restartQuiz()" class="mt-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Ulangi Kuis
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-400 border-b border-slate-700 pb-2">
+                    <span id="quizProgressText">Soal 1 dari 5</span>
+                    <span id="quizCategoryText" class="text-amber-400">Kategori: Ikatan Ion & Kovalen</span>
+                </div>
+                <h3 id="quizQuestionText" class="text-base md:text-lg font-semibold text-slate-100 leading-snug"></h3>
+                <div id="quizOptionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                <div id="quizFeedback" class="hidden p-3 rounded-lg text-xs font-medium border"></div>
+                <div class="flex justify-end mt-2">
+                    <button id="nextQuizBtn" onclick="nextQuestion()" class="hidden bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs transition">
+                        Pertanyaan Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            `;
+            loadQuestion();
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
